@@ -16,27 +16,31 @@ export default class App extends React.Component {
           time:14544,
           running:false,
           id:0,
-          
+          label:"Timer 1"
         },
         {
           time:1338,
           running:false,
           id:1,
+          label:"Timer 2"
         },
         {
           time:6632,
           running:false,
           id:2,
+          label:"Timer 3"
         },
         {
           time:9130,
           running:false,
           id:3,
+          label:"Timer 4"
         },
         {
           time:11111,
           running:false,
           id:4,
+          label:"Timer 5"
         },
       ]
     }
@@ -44,8 +48,9 @@ export default class App extends React.Component {
 
   componentDidMount = () => {
     this.setState({
-      count:this.state.timers.length-1
+      count:this.state.timers.length
     })
+    setInterval(this.tick,200)
   }
 
   addTimer = () => {
@@ -53,9 +58,21 @@ export default class App extends React.Component {
       timers: [...prevState.timers,{
         running:false,
         id:this.state.count+1,
-        time:0
+        time:0,
+        label:"Timer " + (this.state.count + 1)
       }],
       count:prevState.count+1
+    }))
+  }
+
+  tick = () => {
+    this.setState(prevState => ({
+      timers:prevState.timers.map((timer) => {
+        if(timer.running) {
+          timer.time = timer.time + 0.2
+        }
+        return timer
+      })
     }))
   }
 
@@ -76,7 +93,10 @@ export default class App extends React.Component {
   onReset = (id) => {
     this.setState(prevState => ({
       timers:prevState.timers.map(timer => {
-        timer.running = false
+        if (timer.id == id) {
+          timer.running = false
+          timer.time = 0
+        }
         return timer
       })
     }))
@@ -92,7 +112,8 @@ export default class App extends React.Component {
     this.setState(prevState => ({
       timers:prevState.timers.map(timer => {
         timer.running = false
-        timer.time = !(timer.time)
+        // timer.time = !(timer.time)
+        timer.time = 0
         return timer
       })
     }))
@@ -102,6 +123,18 @@ export default class App extends React.Component {
     this.setState({
       mainHeight:event.nativeEvent.layout.height
     },()=>{console.log(this.state.mainHeight)})
+  }
+
+  onLabelChange = (id,text) => {
+    this.setState(prevState => ({
+      timers:prevState.timers.map((timer) => {
+        if (timer.id == id) {
+          timer.label = text
+        }
+        return timer
+      })
+    }))
+    // this.forceUpdate()
   }
 
   render() {
@@ -120,13 +153,14 @@ export default class App extends React.Component {
                 <TouchableOpacity style={[styles.timer,{height: (this.state.mainHeight - 4)/Math.ceil(this.state.timers.length/(this.state.timers.length > 8 ? 3 : 2)) }]} onPress={() => {this.handleClick(item.id)}}>
                   <StopwatchWithLabelNoButtons
                     running={item.running}
-                    label={'Timer ' + (item.id+1)}
+                    label={item.label}
                     color={colors[(item.id % colors.length)]}
                     onDelete={this.onDelete}
                     id={item.id}
                     time={item.time}
-                    tick={this.tick}
+
                     onReset={this.onReset}
+                    onLabelChange={this.onLabelChange}
                   />
                 </TouchableOpacity>
             )}
